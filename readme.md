@@ -1,78 +1,134 @@
 # keras-neural-network
 
+### Title: Pima Indians Diabetes Database : Classification Problem
 
-1. Title: Pima Indians Diabetes Database
+# Neural Network with Keras
 
-2. Sources:
-   (a) Original owners: National Institute of Diabetes and Digestive and
-                        Kidney Diseases
-   (b) Donor of database: Vincent Sigillito (vgs@aplcen.apl.jhu.edu)
-                          Research Center, RMI Group Leader
-                          Applied Physics Laboratory
-                          The Johns Hopkins University
-                          Johns Hopkins Road
-                          Laurel, MD 20707
-                          (301) 953-6231
-   (c) Date received: 9 May 1990
+## Import Libraries
 
-3. Past Usage:
-    1. Smith,~J.~W., Everhart,~J.~E., Dickson,~W.~C., Knowler,~W.~C., \&
-       Johannes,~R.~S. (1988). Using the ADAP learning algorithm to forecast
-       the onset of diabetes mellitus.  In {\it Proceedings of the Symposium
-       on Computer Applications and Medical Care} (pp. 261--265).  IEEE
-       Computer Society Press.
 
-       The diagnostic, binary-valued variable investigated is whether the
-       patient shows signs of diabetes according to World Health Organization
-       criteria (i.e., if the 2 hour post-load plasma glucose was at least 
-       200 mg/dl at any survey  examination or if found during routine medical
-       care).   The population lives near Phoenix, Arizona, USA.
+```python
+# first neural network with keras
+import tensorflow as tf
+```
 
-       Results: Their ADAP algorithm makes a real-valued prediction between
-       0 and 1.  This was transformed into a binary decision using a cutoff of 
-       0.448.  Using 576 training instances, the sensitivity and specificity
-       of their algorithm was 76% on the remaining 192 instances.
 
-4. Relevant Information:
-      Several constraints were placed on the selection of these instances from
-      a larger database.  In particular, all patients here are females at
-      least 21 years old of Pima Indian heritage.  ADAP is an adaptive learning
-      routine that generates and executes digital analogs of perceptron-like
-      devices.  It is a unique algorithm; see the paper for details.
+```python
+from numpy import loadtxt
+from tensorflow.keras.models import Sequential
+from tensorflow.keras.layers import Dense
+```
 
-5. Number of Instances: 768
+## Load Data
 
-6. Number of Attributes: 8 plus class 
 
-7. For Each Attribute: (all numeric-valued)
-   1. Number of times pregnant
-   2. Plasma glucose concentration a 2 hours in an oral glucose tolerance test
-   3. Diastolic blood pressure (mm Hg)
-   4. Triceps skin fold thickness (mm)
-   5. 2-Hour serum insulin (mu U/ml)
-   6. Body mass index (weight in kg/(height in m)^2)
-   7. Diabetes pedigree function
-   8. Age (years)
-   9. Class variable (0 or 1)
+```python
+# load the dataset
+dataset = loadtxt('pima-indians-diabetes.csv', delimiter=',')
+# split into input (X) and output (y) variables
+X = dataset[:,0:8]
+y = dataset[:,8]
+```
 
-8. Missing Attribute Values: Yes
+## Define Keras Model
 
-9. Class Distribution: (class value 1 is interpreted as "tested positive for
-   diabetes")
 
-   Class Value  Number of instances
-   0            500
-   1            268
+```python
+# define the keras model
+model = Sequential()
+model.add(Dense(12, input_shape=(8,), activation='relu'))
+model.add(Dense(8, activation='relu'))
+model.add(Dense(1, activation='sigmoid'))
+```
 
-10. Brief statistical analysis:
+## Compile Keras Model
 
-    Attribute number:    Mean:   Standard Deviation:
-    1.                     3.8     3.4
-    2.                   120.9    32.0
-    3.                    69.1    19.4
-    4.                    20.5    16.0
-    5.                    79.8   115.2
-    6.                    32.0     7.9
-    7.                     0.5     0.3
-    8.                    33.2    11.8
 
+```python
+# compile the keras model
+model.compile(loss='binary_crossentropy', optimizer='adam', metrics=['accuracy'])
+```
+
+## Fit Keras Model
+
+
+```python
+# fit the keras model on the dataset
+model.fit(X, y, epochs=150, batch_size=10)
+```
+
+    Epoch 1/150
+    77/77 [==============================] - 1s 1ms/step - loss: 2.4194 - accuracy: 0.5221
+    Epoch 2/150
+    77/77 [==============================] - 0s 1ms/step - loss: 1.2206 - accuracy: 0.5482
+    Epoch 3/150
+    77/77 [==============================] - 0s 1ms/step - loss: 0.9537 - accuracy: 0.5690
+    Epoch 4/150
+    77/77 [==============================] - 0s 1ms/step - loss: 0.8730 - accuracy: 0.5794
+    Epoch 5/150
+    ............
+    ............
+    Epoch 145/150
+    77/77 [==============================] - 0s 1ms/step - loss: 0.5413 - accuracy: 0.6979
+    Epoch 146/150
+    77/77 [==============================] - 0s 1ms/step - loss: 0.5373 - accuracy: 0.7188
+    Epoch 147/150
+    77/77 [==============================] - 0s 1ms/step - loss: 0.5393 - accuracy: 0.7135
+    Epoch 148/150
+    77/77 [==============================] - 0s 1ms/step - loss: 0.5336 - accuracy: 0.7070
+    Epoch 149/150
+    77/77 [==============================] - 0s 1ms/step - loss: 0.5367 - accuracy: 0.7070
+    Epoch 150/150
+    77/77 [==============================] - 0s 1ms/step - loss: 0.5318 - accuracy: 0.7109
+    
+
+    <keras.callbacks.History at 0x1c92d68ff10>
+
+
+
+## Evaluate Keras Model
+
+
+```python
+# evaluate the keras model
+_, accuracy = model.evaluate(X, y)
+print('Accuracy: %.2f' % (accuracy*100))
+```
+
+    24/24 [==============================] - 0s 938us/step - loss: 0.5844 - accuracy: 0.6758
+    Accuracy: 67.58
+    
+
+## Make Predictions
+
+
+```python
+# make probability predictions with the model
+predictions = model.predict(X)
+# round predictions
+rounded = [round(x[0]) for x in predictions]
+
+# make class predictions with the model
+predictions = (model.predict(X) > 0.5).astype(int)
+
+for i in range(5):
+    print('%s => %d (expected %d)' % (X[i].tolist(), predictions[i], y[i]))
+```
+
+    24/24 [==============================] - 0s 855us/step
+    24/24 [==============================] - 0s 1ms/step
+    [6.0, 148.0, 72.0, 35.0, 0.0, 33.6, 0.627, 50.0] => 1 (expected 1)
+    [1.0, 85.0, 66.0, 29.0, 0.0, 26.6, 0.351, 31.0] => 0 (expected 0)
+    [8.0, 183.0, 64.0, 0.0, 0.0, 23.3, 0.672, 32.0] => 1 (expected 1)
+    [1.0, 89.0, 66.0, 23.0, 94.0, 28.1, 0.167, 21.0] => 0 (expected 0)
+    [0.0, 137.0, 40.0, 35.0, 168.0, 43.1, 2.288, 33.0] => 0 (expected 1)
+    
+
+    C:\Users\ebot6\AppData\Local\Temp\ipykernel_24372\964902141.py:10: DeprecationWarning: Conversion of an array with ndim > 0 to a scalar is deprecated, and will error in future. Ensure you extract a single element from your array before performing this operation. (Deprecated NumPy 1.25.)
+      print('%s => %d (expected %d)' % (X[i].tolist(), predictions[i], y[i]))
+    
+
+
+```python
+
+```
